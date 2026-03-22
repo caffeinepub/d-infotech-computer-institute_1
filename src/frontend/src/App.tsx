@@ -6,10 +6,8 @@ import AdminPanel from "@/pages/AdminPanel";
 import Admissions from "@/pages/Admissions";
 import Contact from "@/pages/Contact";
 import Courses from "@/pages/Courses";
-import Dashboard from "@/pages/Dashboard";
 import Gallery from "@/pages/Gallery";
 import Home from "@/pages/Home";
-import Login from "@/pages/Login";
 import {
   Outlet,
   RouterProvider,
@@ -56,20 +54,10 @@ const galleryRoute = createRoute({
   path: "/gallery",
   component: Gallery,
 });
-const loginRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/login",
-  component: Login,
-});
 const contactRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/contact",
   component: Contact,
-});
-const dashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/dashboard",
-  component: Dashboard,
 });
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -83,9 +71,7 @@ const routeTree = rootRoute.addChildren([
   coursesRoute,
   admissionsRoute,
   galleryRoute,
-  loginRoute,
   contactRoute,
-  dashboardRoute,
   adminRoute,
 ]);
 

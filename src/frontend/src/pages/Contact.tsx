@@ -3,12 +3,11 @@ import { CheckCircle, Clock, Loader2, Mail, MapPin, Phone } from "lucide-react";
 import { useState } from "react";
 import { SiFacebook, SiInstagram, SiWhatsapp, SiYoutube } from "react-icons/si";
 
+const ADDRESS =
+  "D/1, Siddhivinayak Chs, Bus Depot, Plot No. 64, near Lokmanya Nagar, Lokmanya Nagar, Thane West, Thane, Maharashtra 400606";
+
 const contactInfo = [
-  {
-    icon: MapPin,
-    label: "Address",
-    value: "D-Infotech Computer Institute, Pune, Maharashtra, India",
-  },
+  { icon: MapPin, label: "Address", value: ADDRESS },
   { icon: Phone, label: "Phone", value: "9967283284" },
   { icon: Mail, label: "Email", value: "info@dinfotech.in" },
   {
@@ -54,22 +53,17 @@ export default function Contact() {
       setSuccess(true);
       setForm({ name: "", email: "", message: "" });
     } catch {
-      // silent
+      /* silent */
     } finally {
       setLoading(false);
     }
   };
 
   const inputClass = (field: string) =>
-    `w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors ${
-      errors[field]
-        ? "border-red-400 bg-red-50"
-        : "border-gray-200 focus:border-orange-500"
-    }`;
+    `w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 transition-colors ${errors[field] ? "border-red-400 bg-red-50" : "border-gray-200 focus:border-orange-500"}`;
 
   return (
     <div>
-      {/* Banner */}
       <section className="bg-orange-600 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl font-black text-white mb-3">Contact Us</h1>
@@ -78,11 +72,9 @@ export default function Contact() {
           </p>
         </div>
       </section>
-
       <section className="py-16 bg-[#F7F7F7]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Left: Contact Info */}
             <div>
               <h2 className="text-2xl font-black text-gray-900 mb-6">
                 Get in Touch
@@ -102,7 +94,6 @@ export default function Contact() {
                   </div>
                 ))}
               </div>
-
               <h3 className="font-bold text-gray-900 mb-3">Follow Us</h3>
               <div className="flex gap-3">
                 {socialLinks.map((s) => (
@@ -120,8 +111,6 @@ export default function Contact() {
                 ))}
               </div>
             </div>
-
-            {/* Right: Contact Form */}
             <div className="bg-white rounded-2xl shadow-card p-8 border border-gray-100">
               {success ? (
                 <div
@@ -252,11 +241,9 @@ export default function Contact() {
           </div>
         </div>
       </section>
-
-      {/* Map */}
       <section className="h-80">
         <iframe
-          src="https://maps.google.com/maps?q=pune+maharashtra&output=embed"
+          src="https://maps.google.com/maps?q=Siddhivinayak+Chs+Lokmanya+Nagar+Thane+West&output=embed"
           width="100%"
           height="100%"
           style={{ border: 0 }}

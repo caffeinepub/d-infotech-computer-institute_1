@@ -56,6 +56,8 @@ export interface _SERVICE {
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'getAllAdmissionInquiries' : ActorMethod<[], Array<AdmissionInquiry>>,
   'getAllContactSubmissions' : ActorMethod<[], Array<ContactSubmission>>,
+  'getAdmissionInquiriesAdmin' : ActorMethod<[string], Array<AdmissionInquiry>>,
+  'getContactSubmissionsAdmin' : ActorMethod<[string], Array<ContactSubmission>>,
   'getAllTestimonials' : ActorMethod<[], Array<Testimonial>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,

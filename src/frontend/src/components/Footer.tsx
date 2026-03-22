@@ -30,14 +30,15 @@ const socialLinks = [
   { icon: SiWhatsapp, label: "WhatsApp", href: "https://wa.me/919967283284" },
 ];
 
+const ADDRESS =
+  "D/1, Siddhivinayak Chs, Bus Depot, Plot No. 64, near Lokmanya Nagar, Lokmanya Nagar, Thane West, Thane, Maharashtra 400606";
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
-
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Col 1: Logo + Address */}
           <div>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center font-black text-white text-lg">
@@ -60,7 +61,7 @@ export default function Footer() {
                   size={14}
                   className="text-orange-600 mt-0.5 flex-shrink-0"
                 />
-                <span>Pune, Maharashtra, India</span>
+                <span>{ADDRESS}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone size={14} className="text-orange-600 flex-shrink-0" />
@@ -72,8 +73,6 @@ export default function Footer() {
               </div>
             </div>
           </div>
-
-          {/* Col 2: Quick Links */}
           <div>
             <h3 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">
               Quick Links
@@ -84,11 +83,7 @@ export default function Footer() {
                   <Link
                     to={link.to}
                     data-ocid="footer.link"
-                    className={`text-sm transition-colors ${
-                      link.label === "Admin Panel"
-                        ? "text-orange-400 hover:text-orange-300 font-semibold"
-                        : "text-gray-400 hover:text-orange-400"
-                    }`}
+                    className={`text-sm transition-colors ${link.label === "Admin Panel" ? "text-orange-400 hover:text-orange-300 font-semibold" : "text-gray-400 hover:text-orange-400"}`}
                   >
                     {link.label}
                   </Link>
@@ -96,8 +91,6 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-
-          {/* Col 3: Courses */}
           <div>
             <h3 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">
               Our Courses
@@ -116,8 +109,6 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-
-          {/* Col 4: Social */}
           <div>
             <h3 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">
               Follow Us
@@ -147,7 +138,6 @@ export default function Footer() {
             </div>
           </div>
         </div>
-
         <div className="mt-10 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
           <p>
             &copy; {currentYear} D-Infotech Computer Institute. All rights

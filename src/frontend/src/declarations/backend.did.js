@@ -65,6 +65,16 @@ export const idlService = IDL.Service({
       [IDL.Vec(ContactSubmission)],
       ['query'],
     ),
+  'getAdmissionInquiriesAdmin' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(AdmissionInquiry)],
+      ['query'],
+    ),
+  'getContactSubmissionsAdmin' : IDL.Func(
+      [IDL.Text],
+      [IDL.Vec(ContactSubmission)],
+      ['query'],
+    ),
   'getAllTestimonials' : IDL.Func([], [IDL.Vec(Testimonial)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
@@ -150,6 +160,16 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getAllContactSubmissions' : IDL.Func(
         [],
+        [IDL.Vec(ContactSubmission)],
+        ['query'],
+      ),
+    'getAdmissionInquiriesAdmin' : IDL.Func(
+        [IDL.Text],
+        [IDL.Vec(AdmissionInquiry)],
+        ['query'],
+      ),
+    'getContactSubmissionsAdmin' : IDL.Func(
+        [IDL.Text],
         [IDL.Vec(ContactSubmission)],
         ['query'],
       ),

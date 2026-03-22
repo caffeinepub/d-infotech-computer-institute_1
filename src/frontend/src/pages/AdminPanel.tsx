@@ -22,7 +22,7 @@ import {
   RefreshCw,
   ShieldCheck,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const ADMIN_PASSWORD = "dinfotech@admin";
 
@@ -35,63 +35,69 @@ function formatDate(timestamp: bigint): string {
 }
 
 export default function AdminPanel() {
-  const { actor } = useActor();
+  const { actor, isFetching } = useActor();
   const [password, setPassword] = useState("");
-  const [savedPassword, setSavedPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginError, setLoginError] = useState("");
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
   const [enquiries, setEnquiries] = useState<AdmissionInquiry[]>([]);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
-  const [loadingEnquiries, setLoadingEnquiries] = useState(false);
-  const [loadingContacts, setLoadingContacts] = useState(false);
+  const [loadingData, setLoadingData] = useState(false);
+  const [dataError, setDataError] = useState("");
+  const [fetchDone, setFetchDone] = useState(false);
 
-  async function fetchData(pwd: string) {
-    if (pwd !== ADMIN_PASSWORD) {
-      throw new Error("Wrong admin password");
-    }
+  const fetchData = useCallback(async () => {
     if (!actor) return;
-    setLoadingEnquiries(true);
-    setLoadingContacts(true);
+    setLoadingData(true);
+    setDataError("");
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rawActor = actor as any;
       const [enqData, ctData] = await Promise.all([
-        rawActor.getAdmissionInquiriesAdmin(pwd) as Promise<AdmissionInquiry[]>,
-        rawActor.getContactSubmissionsAdmin(pwd) as Promise<
-          ContactSubmission[]
-        >,
+        actor.getAdmissionInquiriesAdmin(ADMIN_PASSWORD),
+        actor.getContactSubmissionsAdmin(ADMIN_PASSWORD),
       ]);
       setEnquiries(enqData);
       setContacts(ctData);
+      setFetchDone(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setDataError(
+        `Failed to load data: ${msg}. Please click Refresh to try again.`,
+      );
+      console.error(err);
     } finally {
-      setLoadingEnquiries(false);
-      setLoadingContacts(false);
+      setLoadingData(false);
     }
-  }
+  }, [actor]);
 
-  async function handleLogin(e: React.FormEvent) {
+  useEffect(() => {
+    if (isLoggedIn && actor && !fetchDone) {
+      fetchData();
+    }
+  }, [isLoggedIn, actor, fetchDone, fetchData]);
+
+  function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setIsLoggingIn(true);
     setLoginError("");
-    try {
-      await fetchData(password);
-      setSavedPassword(password);
+    const trimmed = password.trim();
+    if (trimmed === ADMIN_PASSWORD) {
       setIsLoggedIn(true);
-    } catch {
+    } else {
       setLoginError("Incorrect password. Please try again.");
-    } finally {
-      setIsLoggingIn(false);
     }
   }
 
   function handleLogout() {
     setIsLoggedIn(false);
     setPassword("");
-    setSavedPassword("");
     setEnquiries([]);
     setContacts([]);
+    setDataError("");
+    setFetchDone(false);
+  }
+
+  function handleRefresh() {
+    setFetchDone(false);
+    fetchData();
   }
 
   if (!isLoggedIn) {
@@ -137,17 +143,9 @@ export default function AdminPanel() {
               <Button
                 type="submit"
                 className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2"
-                disabled={isLoggingIn}
                 data-ocid="admin.submit_button"
               >
-                {isLoggingIn ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing
-                    In...
-                  </>
-                ) : (
-                  "Enter Admin Panel"
-                )}
+                Enter Admin Panel
               </Button>
             </form>
             <p className="text-center text-xs text-gray-400 mt-4">
@@ -160,9 +158,10 @@ export default function AdminPanel() {
     );
   }
 
+  const actorLoading = isFetching || (!actor && !dataError && !fetchDone);
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-orange-600 text-white px-6 py-4 flex items-center justify-between shadow-md">
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-6 w-6" />
@@ -178,10 +177,16 @@ export default function AdminPanel() {
             variant="outline"
             size="sm"
             className="border-white text-white hover:bg-orange-700 bg-transparent"
-            onClick={() => fetchData(savedPassword)}
+            onClick={handleRefresh}
+            disabled={loadingData || actorLoading}
             data-ocid="admin.secondary_button"
           >
-            <RefreshCw className="h-4 w-4 mr-1" /> Refresh
+            {loadingData ? (
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+            ) : (
+              <RefreshCw className="h-4 w-4 mr-1" />
+            )}
+            Refresh
           </Button>
           <Button
             variant="outline"
@@ -195,9 +200,26 @@ export default function AdminPanel() {
         </div>
       </header>
 
-      {/* Dashboard */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Stats */}
+        {actorLoading && (
+          <div
+            className="mb-4 p-4 bg-orange-50 border border-orange-200 text-orange-700 rounded-md text-sm flex items-center gap-2"
+            data-ocid="admin.loading_state"
+          >
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Connecting to backend, please wait...
+          </div>
+        )}
+
+        {dataError && (
+          <div
+            className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
+            data-ocid="admin.error_state"
+          >
+            {dataError}
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-4 mb-8">
           <Card className="border-l-4 border-l-orange-600">
             <CardContent className="p-4 flex items-center gap-4">
@@ -227,7 +249,6 @@ export default function AdminPanel() {
           </Card>
         </div>
 
-        {/* Tabs */}
         <Tabs defaultValue="enquiries">
           <TabsList className="mb-4">
             <TabsTrigger value="enquiries" data-ocid="admin.tab">
@@ -248,7 +269,6 @@ export default function AdminPanel() {
             </TabsTrigger>
           </TabsList>
 
-          {/* Admission Enquiries */}
           <TabsContent value="enquiries">
             <Card>
               <CardHeader className="pb-3">
@@ -257,7 +277,7 @@ export default function AdminPanel() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {loadingEnquiries ? (
+                {loadingData ? (
                   <div
                     className="flex justify-center py-12"
                     data-ocid="admin.loading_state"
@@ -346,7 +366,6 @@ export default function AdminPanel() {
             </Card>
           </TabsContent>
 
-          {/* Contact Messages */}
           <TabsContent value="contacts">
             <Card>
               <CardHeader className="pb-3">
@@ -355,7 +374,7 @@ export default function AdminPanel() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {loadingContacts ? (
+                {loadingData ? (
                   <div
                     className="flex justify-center py-12"
                     data-ocid="admin.loading_state"

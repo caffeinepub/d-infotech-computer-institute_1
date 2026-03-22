@@ -136,6 +136,8 @@ export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     getAllAdmissionInquiries(): Promise<Array<AdmissionInquiry>>;
+    getAdmissionInquiriesAdmin(password: string): Promise<Array<AdmissionInquiry>>;
+    getContactSubmissionsAdmin(password: string): Promise<Array<ContactSubmission>>;
     getAllContactSubmissions(): Promise<Array<ContactSubmission>>;
     getAllTestimonials(): Promise<Array<Testimonial>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
@@ -211,6 +213,35 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getAdmissionInquiriesAdmin(arg0: string): Promise<Array<AdmissionInquiry>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAdmissionInquiriesAdmin(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAdmissionInquiriesAdmin(arg0);
+            return result;
+        }
+    }
+    async getContactSubmissionsAdmin(arg0: string): Promise<Array<ContactSubmission>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getContactSubmissionsAdmin(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getContactSubmissionsAdmin(arg0);
+            return result;
+        }
+    }
+
     async getAllTestimonials(): Promise<Array<Testimonial>> {
         if (this.processError) {
             try {

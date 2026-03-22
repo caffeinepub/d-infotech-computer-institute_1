@@ -191,11 +191,11 @@ export default function Admissions() {
                     className="text-green-500 mx-auto mb-4"
                   />
                   <h3 className="text-xl font-black text-gray-900 mb-2">
-                    Inquiry Submitted!
+                    Enquiry Submitted Successfully!
                   </h3>
                   <p className="text-gray-500 mb-6">
-                    Thank you! We'll contact you within 24 hours for a free
-                    counseling session.
+                    Thank you for your enquiry! We'll contact you within 24
+                    hours.
                   </p>
                   <button
                     type="button"
