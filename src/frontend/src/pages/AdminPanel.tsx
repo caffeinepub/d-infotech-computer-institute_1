@@ -55,9 +55,13 @@ export default function AdminPanel() {
     setLoadingEnquiries(true);
     setLoadingContacts(true);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawActor = actor as any;
       const [enqData, ctData] = await Promise.all([
-        actor.getAllAdmissionInquiries(),
-        actor.getAllContactSubmissions(),
+        rawActor.getAdmissionInquiriesAdmin(pwd) as Promise<AdmissionInquiry[]>,
+        rawActor.getContactSubmissionsAdmin(pwd) as Promise<
+          ContactSubmission[]
+        >,
       ]);
       setEnquiries(enqData);
       setContacts(ctData);
