@@ -177,6 +177,23 @@ actor {
     admissionInquiriesMap.values().toArray().sort(AdmissionInquiry.compareByTimestamp);
   };
 
+  // Admin panel: password-protected query to view all admission enquiries with IDs
+  public query func getAdmissionInquiriesWithIdsAdmin(password : Text) : async [(Nat, AdmissionInquiry)] {
+    if (password != ADMIN_PASSWORD) {
+      Runtime.trap("Wrong admin password");
+    };
+    admissionInquiriesMap.entries().toArray();
+  };
+
+  // Admin panel: password-protected delete for an admission enquiry
+  public shared func deleteAdmissionInquiryAdmin(password : Text, id : Nat) : async Bool {
+    if (password != ADMIN_PASSWORD) {
+      Runtime.trap("Wrong admin password");
+    };
+    admissionInquiriesMap.remove(id);
+    true;
+  };
+
   // Admin panel: password-protected query to view all contact submissions
   public query func getContactSubmissionsAdmin(password : Text) : async [ContactSubmission] {
     if (password != ADMIN_PASSWORD) {

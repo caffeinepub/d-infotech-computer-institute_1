@@ -21,6 +21,7 @@ import {
   Mail,
   RefreshCw,
   ShieldCheck,
+  Trash2,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -34,29 +35,48 @@ function formatDate(timestamp: bigint): string {
   });
 }
 
+type EnquiryEntry = { id: bigint; data: AdmissionInquiry };
+
 export default function AdminPanel() {
   const { actor, isFetching } = useActor();
   const [password, setPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginError, setLoginError] = useState("");
 
-  const [enquiries, setEnquiries] = useState<AdmissionInquiry[]>([]);
+  const [enquiries, setEnquiries] = useState<EnquiryEntry[]>([]);
   const [contacts, setContacts] = useState<ContactSubmission[]>([]);
   const [loadingData, setLoadingData] = useState(false);
   const [dataError, setDataError] = useState("");
   const [fetchDone, setFetchDone] = useState(false);
+  const [deletingId, setDeletingId] = useState<bigint | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!actor) return;
     setLoadingData(true);
     setDataError("");
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawActor = actor as any;
       const [enqData, ctData] = await Promise.all([
-        actor.getAdmissionInquiriesAdmin(ADMIN_PASSWORD),
+        rawActor.getAdmissionInquiriesWithIdsAdmin
+          ? rawActor.getAdmissionInquiriesWithIdsAdmin(ADMIN_PASSWORD)
+          : actor
+              .getAdmissionInquiriesAdmin(ADMIN_PASSWORD)
+              .then((items: AdmissionInquiry[]) =>
+                items.map(
+                  (item, idx) =>
+                    [BigInt(idx), item] as [bigint, AdmissionInquiry],
+                ),
+              ),
         actor.getContactSubmissionsAdmin(ADMIN_PASSWORD),
       ]);
-      setEnquiries(enqData);
-      setContacts(ctData);
+      const mapped: EnquiryEntry[] = (enqData as [bigint, AdmissionInquiry][])
+        .map(([id, data]) => ({ id, data }))
+        .sort((a: EnquiryEntry, b: EnquiryEntry) =>
+          Number(b.data.timestamp - a.data.timestamp),
+        );
+      setEnquiries(mapped);
+      setContacts(ctData as ContactSubmission[]);
       setFetchDone(true);
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -74,6 +94,23 @@ export default function AdminPanel() {
       fetchData();
     }
   }, [isLoggedIn, actor, fetchDone, fetchData]);
+
+  async function handleDeleteEnquiry(id: bigint) {
+    if (!actor) return;
+    setDeletingId(id);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rawActor = actor as any;
+      if (rawActor.deleteAdmissionInquiryAdmin) {
+        await rawActor.deleteAdmissionInquiryAdmin(ADMIN_PASSWORD, id);
+      }
+      setEnquiries((prev) => prev.filter((e) => e.id !== id));
+    } catch (err) {
+      console.error("Failed to delete enquiry:", err);
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -149,7 +186,7 @@ export default function AdminPanel() {
               </Button>
             </form>
             <p className="text-center text-xs text-gray-400 mt-4">
-              Contact your system administrator if you've forgotten your
+              Contact your system administrator if you&apos;ve forgotten your
               password.
             </p>
           </CardContent>
@@ -321,12 +358,15 @@ export default function AdminPanel() {
                           <TableHead className="font-semibold text-orange-800">
                             Date
                           </TableHead>
+                          <TableHead className="font-semibold text-orange-800">
+                            Action
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {enquiries.map((enq, idx) => (
                           <TableRow
-                            key={`${enq.email}-${String(enq.timestamp)}`}
+                            key={String(enq.id)}
                             className="hover:bg-orange-50/50"
                             data-ocid={`admin.item.${idx + 1}`}
                           >
@@ -334,27 +374,43 @@ export default function AdminPanel() {
                               {idx + 1}
                             </TableCell>
                             <TableCell className="font-medium">
-                              {enq.name}
+                              {enq.data.name}
                             </TableCell>
-                            <TableCell>{enq.phone}</TableCell>
+                            <TableCell>{enq.data.phone}</TableCell>
                             <TableCell className="text-blue-600">
-                              {enq.email}
+                              {enq.data.email}
                             </TableCell>
                             <TableCell>
                               <Badge
                                 variant="outline"
                                 className="border-orange-300 text-orange-700 bg-orange-50"
                               >
-                                {enq.course}
+                                {enq.data.course}
                               </Badge>
                             </TableCell>
                             <TableCell className="max-w-xs">
                               <p className="truncate text-sm text-gray-600">
-                                {enq.message}
+                                {enq.data.message}
                               </p>
                             </TableCell>
                             <TableCell className="text-sm text-gray-500 whitespace-nowrap">
-                              {formatDate(enq.timestamp)}
+                              {formatDate(enq.data.timestamp)}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                onClick={() => handleDeleteEnquiry(enq.id)}
+                                disabled={deletingId === enq.id}
+                                data-ocid={`admin.delete_button.${idx + 1}`}
+                              >
+                                {deletingId === enq.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="h-4 w-4" />
+                                )}
+                              </Button>
                             </TableCell>
                           </TableRow>
                         ))}

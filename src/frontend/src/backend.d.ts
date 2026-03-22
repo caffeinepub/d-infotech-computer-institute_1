@@ -55,6 +55,8 @@ export interface backendInterface {
     getAllAdmissionInquiries(): Promise<Array<AdmissionInquiry>>;
     getAllContactSubmissions(): Promise<Array<ContactSubmission>>;
     getAdmissionInquiriesAdmin(password: string): Promise<Array<AdmissionInquiry>>;
+    getAdmissionInquiriesWithIdsAdmin(password: string): Promise<Array<[bigint, AdmissionInquiry]>>;
+    deleteAdmissionInquiryAdmin(password: string, id: bigint): Promise<boolean>;
     getContactSubmissionsAdmin(password: string): Promise<Array<ContactSubmission>>;
     getAllTestimonials(): Promise<Array<Testimonial>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
