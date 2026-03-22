@@ -9,6 +9,7 @@ const quickLinks = [
   { label: "Admissions", to: "/admissions" },
   { label: "Gallery", to: "/gallery" },
   { label: "Contact", to: "/contact" },
+  { label: "Admin Panel", to: "/admin" },
 ];
 
 const courseLinks = [
@@ -83,7 +84,11 @@ export default function Footer() {
                   <Link
                     to={link.to}
                     data-ocid="footer.link"
-                    className="text-sm text-gray-400 hover:text-orange-400 transition-colors"
+                    className={`text-sm transition-colors ${
+                      link.label === "Admin Panel"
+                        ? "text-orange-400 hover:text-orange-300 font-semibold"
+                        : "text-gray-400 hover:text-orange-400"
+                    }`}
                   >
                     {link.label}
                   </Link>
