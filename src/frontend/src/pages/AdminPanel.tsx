@@ -40,6 +40,7 @@ type EnquiryEntry = { id: bigint; data: AdmissionInquiry };
 export default function AdminPanel() {
   const { actor, isFetching } = useActor();
   const [password, setPassword] = useState("");
+  const [adminPassword, setAdminPassword] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginError, setLoginError] = useState("");
 
@@ -50,60 +51,52 @@ export default function AdminPanel() {
   const [fetchDone, setFetchDone] = useState(false);
   const [deletingId, setDeletingId] = useState<bigint | null>(null);
 
-  const fetchData = useCallback(async () => {
-    if (!actor) return;
-    setLoadingData(true);
-    setDataError("");
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rawActor = actor as any;
-      const [enqData, ctData] = await Promise.all([
-        rawActor.getAdmissionInquiriesWithIdsAdmin
-          ? rawActor.getAdmissionInquiriesWithIdsAdmin(ADMIN_PASSWORD)
-          : actor
-              .getAdmissionInquiriesAdmin(ADMIN_PASSWORD)
-              .then((items: AdmissionInquiry[]) =>
-                items.map(
-                  (item, idx) =>
-                    [BigInt(idx), item] as [bigint, AdmissionInquiry],
-                ),
-              ),
-        actor.getContactSubmissionsAdmin(ADMIN_PASSWORD),
-      ]);
-      const mapped: EnquiryEntry[] = (enqData as [bigint, AdmissionInquiry][])
-        .map(([id, data]) => ({ id, data }))
-        .sort((a: EnquiryEntry, b: EnquiryEntry) =>
-          Number(b.data.timestamp - a.data.timestamp),
+  const fetchData = useCallback(
+    async (pwd: string) => {
+      if (!actor) return;
+      // Cast to any: generated type stubs don't include the password parameter
+      // added in the latest backend. The actual runtime method accepts it.
+      const raw = actor as any;
+      setLoadingData(true);
+      setDataError("");
+      try {
+        const [enqData, ctData] = await Promise.all([
+          raw.getAdmissionInquiriesWithIdsAdmin(pwd),
+          raw.getContactSubmissionsAdmin(pwd),
+        ]);
+        const mapped: EnquiryEntry[] = (enqData as [bigint, AdmissionInquiry][])
+          .map(([id, data]) => ({ id, data }))
+          .sort((a: EnquiryEntry, b: EnquiryEntry) =>
+            Number(b.data.timestamp - a.data.timestamp),
+          );
+        setEnquiries(mapped);
+        setContacts(ctData as ContactSubmission[]);
+        setFetchDone(true);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setDataError(
+          `Failed to load data: ${msg}. Please click Refresh to try again.`,
         );
-      setEnquiries(mapped);
-      setContacts(ctData as ContactSubmission[]);
-      setFetchDone(true);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setDataError(
-        `Failed to load data: ${msg}. Please click Refresh to try again.`,
-      );
-      console.error(err);
-    } finally {
-      setLoadingData(false);
-    }
-  }, [actor]);
+        console.error(err);
+      } finally {
+        setLoadingData(false);
+      }
+    },
+    [actor],
+  );
 
   useEffect(() => {
-    if (isLoggedIn && actor && !fetchDone) {
-      fetchData();
+    if (isLoggedIn && actor && !fetchDone && adminPassword) {
+      fetchData(adminPassword);
     }
-  }, [isLoggedIn, actor, fetchDone, fetchData]);
+  }, [isLoggedIn, actor, fetchDone, fetchData, adminPassword]);
 
   async function handleDeleteEnquiry(id: bigint) {
     if (!actor) return;
     setDeletingId(id);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rawActor = actor as any;
-      if (rawActor.deleteAdmissionInquiryAdmin) {
-        await rawActor.deleteAdmissionInquiryAdmin(ADMIN_PASSWORD, id);
-      }
+      // Cast to any: generated type stub has old signature without password param
+      await (actor as any).deleteAdmissionInquiryAdmin(adminPassword, id);
       setEnquiries((prev) => prev.filter((e) => e.id !== id));
     } catch (err) {
       console.error("Failed to delete enquiry:", err);
@@ -117,6 +110,7 @@ export default function AdminPanel() {
     setLoginError("");
     const trimmed = password.trim();
     if (trimmed === ADMIN_PASSWORD) {
+      setAdminPassword(trimmed);
       setIsLoggedIn(true);
     } else {
       setLoginError("Incorrect password. Please try again.");
@@ -126,6 +120,7 @@ export default function AdminPanel() {
   function handleLogout() {
     setIsLoggedIn(false);
     setPassword("");
+    setAdminPassword("");
     setEnquiries([]);
     setContacts([]);
     setDataError("");
@@ -134,7 +129,7 @@ export default function AdminPanel() {
 
   function handleRefresh() {
     setFetchDone(false);
-    fetchData();
+    fetchData(adminPassword);
   }
 
   if (!isLoggedIn) {

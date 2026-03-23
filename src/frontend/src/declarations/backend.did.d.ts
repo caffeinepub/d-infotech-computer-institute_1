@@ -24,17 +24,6 @@ export interface ContactSubmission {
   'message' : string,
   'timestamp' : Time,
 }
-export interface SessionToken {
-  'token' : string,
-  'studentId' : bigint,
-  'createdAt' : Time,
-}
-export interface Student {
-  'id' : bigint,
-  'createdAt' : Time,
-  'email' : string,
-  'hashedPassword' : string,
-}
 export interface Testimonial {
   'review' : string,
   'studentName' : string,
@@ -54,19 +43,18 @@ export type UserRole = { 'admin' : null } |
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'getAllAdmissionInquiries' : ActorMethod<[], Array<AdmissionInquiry>>,
-  'getAllContactSubmissions' : ActorMethod<[], Array<ContactSubmission>>,
-  'getAdmissionInquiriesAdmin' : ActorMethod<[string], Array<AdmissionInquiry>>,
-  'getContactSubmissionsAdmin' : ActorMethod<[string], Array<ContactSubmission>>,
+  'deleteAdmissionInquiryAdmin' : ActorMethod<[bigint], boolean>,
+  'getAdmissionInquiriesAdmin' : ActorMethod<[], Array<AdmissionInquiry>>,
+  'getAdmissionInquiriesWithIdsAdmin' : ActorMethod<
+    [],
+    Array<[bigint, AdmissionInquiry]>
+  >,
   'getAllTestimonials' : ActorMethod<[], Array<Testimonial>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  'getSession' : ActorMethod<[string], SessionToken>,
-  'getStudentById' : ActorMethod<[bigint], Student>,
+  'getContactSubmissionsAdmin' : ActorMethod<[], Array<ContactSubmission>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  'login' : ActorMethod<[string, string], [] | [string]>,
-  'registerStudent' : ActorMethod<[string, string], bigint>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitAdmissionInquiry' : ActorMethod<
     [string, string, string, string, string],
@@ -77,7 +65,6 @@ export interface _SERVICE {
     [string, string, string, bigint],
     undefined
   >,
-  'validateSession' : ActorMethod<[string], boolean>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

@@ -22,12 +22,6 @@ export const AdmissionInquiry = IDL.Record({
   'phone' : IDL.Text,
   'course' : IDL.Text,
 });
-export const ContactSubmission = IDL.Record({
-  'name' : IDL.Text,
-  'email' : IDL.Text,
-  'message' : IDL.Text,
-  'timestamp' : Time,
-});
 export const Testimonial = IDL.Record({
   'review' : IDL.Text,
   'studentName' : IDL.Text,
@@ -40,54 +34,41 @@ export const UserProfile = IDL.Record({
   'email' : IDL.Text,
   'phone' : IDL.Text,
 });
-export const SessionToken = IDL.Record({
-  'token' : IDL.Text,
-  'studentId' : IDL.Nat,
-  'createdAt' : Time,
-});
-export const Student = IDL.Record({
-  'id' : IDL.Nat,
-  'createdAt' : Time,
+export const ContactSubmission = IDL.Record({
+  'name' : IDL.Text,
   'email' : IDL.Text,
-  'hashedPassword' : IDL.Text,
+  'message' : IDL.Text,
+  'timestamp' : Time,
 });
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'getAllAdmissionInquiries' : IDL.Func(
-      [],
-      [IDL.Vec(AdmissionInquiry)],
-      ['query'],
-    ),
-  'getAllContactSubmissions' : IDL.Func(
-      [],
-      [IDL.Vec(ContactSubmission)],
-      ['query'],
-    ),
+  'deleteAdmissionInquiryAdmin' : IDL.Func([IDL.Nat], [IDL.Bool], []),
   'getAdmissionInquiriesAdmin' : IDL.Func(
-      [IDL.Text],
+      [],
       [IDL.Vec(AdmissionInquiry)],
       ['query'],
     ),
-  'getContactSubmissionsAdmin' : IDL.Func(
-      [IDL.Text],
-      [IDL.Vec(ContactSubmission)],
+  'getAdmissionInquiriesWithIdsAdmin' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Tuple(IDL.Nat, AdmissionInquiry))],
       ['query'],
     ),
   'getAllTestimonials' : IDL.Func([], [IDL.Vec(Testimonial)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-  'getSession' : IDL.Func([IDL.Text], [SessionToken], ['query']),
-  'getStudentById' : IDL.Func([IDL.Nat], [Student], ['query']),
+  'getContactSubmissionsAdmin' : IDL.Func(
+      [],
+      [IDL.Vec(ContactSubmission)],
+      ['query'],
+    ),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-  'login' : IDL.Func([IDL.Text, IDL.Text], [IDL.Opt(IDL.Text)], []),
-  'registerStudent' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitAdmissionInquiry' : IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
@@ -100,7 +81,6 @@ export const idlService = IDL.Service({
       [],
       [],
     ),
-  'validateSession' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
 });
 
 export const idlInitArgs = [];
@@ -120,12 +100,6 @@ export const idlFactory = ({ IDL }) => {
     'phone' : IDL.Text,
     'course' : IDL.Text,
   });
-  const ContactSubmission = IDL.Record({
-    'name' : IDL.Text,
-    'email' : IDL.Text,
-    'message' : IDL.Text,
-    'timestamp' : Time,
-  });
   const Testimonial = IDL.Record({
     'review' : IDL.Text,
     'studentName' : IDL.Text,
@@ -138,54 +112,41 @@ export const idlFactory = ({ IDL }) => {
     'email' : IDL.Text,
     'phone' : IDL.Text,
   });
-  const SessionToken = IDL.Record({
-    'token' : IDL.Text,
-    'studentId' : IDL.Nat,
-    'createdAt' : Time,
-  });
-  const Student = IDL.Record({
-    'id' : IDL.Nat,
-    'createdAt' : Time,
+  const ContactSubmission = IDL.Record({
+    'name' : IDL.Text,
     'email' : IDL.Text,
-    'hashedPassword' : IDL.Text,
+    'message' : IDL.Text,
+    'timestamp' : Time,
   });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'getAllAdmissionInquiries' : IDL.Func(
-        [],
-        [IDL.Vec(AdmissionInquiry)],
-        ['query'],
-      ),
-    'getAllContactSubmissions' : IDL.Func(
-        [],
-        [IDL.Vec(ContactSubmission)],
-        ['query'],
-      ),
+    'deleteAdmissionInquiryAdmin' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAdmissionInquiriesAdmin' : IDL.Func(
-        [IDL.Text],
+        [],
         [IDL.Vec(AdmissionInquiry)],
         ['query'],
       ),
-    'getContactSubmissionsAdmin' : IDL.Func(
-        [IDL.Text],
-        [IDL.Vec(ContactSubmission)],
+    'getAdmissionInquiriesWithIdsAdmin' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Nat, AdmissionInquiry))],
         ['query'],
       ),
     'getAllTestimonials' : IDL.Func([], [IDL.Vec(Testimonial)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
-    'getSession' : IDL.Func([IDL.Text], [SessionToken], ['query']),
-    'getStudentById' : IDL.Func([IDL.Nat], [Student], ['query']),
+    'getContactSubmissionsAdmin' : IDL.Func(
+        [],
+        [IDL.Vec(ContactSubmission)],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
-    'login' : IDL.Func([IDL.Text, IDL.Text], [IDL.Opt(IDL.Text)], []),
-    'registerStudent' : IDL.Func([IDL.Text, IDL.Text], [IDL.Nat], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'submitAdmissionInquiry' : IDL.Func(
         [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
@@ -198,7 +159,6 @@ export const idlFactory = ({ IDL }) => {
         [],
         [],
       ),
-    'validateSession' : IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   });
 };
 
