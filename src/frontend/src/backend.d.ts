@@ -22,11 +22,6 @@ export interface ContactSubmission {
     message: string;
     timestamp: Time;
 }
-export interface UserProfile {
-    name: string;
-    email: string;
-    phone: string;
-}
 export interface Testimonial {
     review: string;
     studentName: string;
@@ -34,23 +29,12 @@ export interface Testimonial {
     rating: bigint;
     course: string;
 }
-export enum UserRole {
-    admin = "admin",
-    user = "user",
-    guest = "guest"
-}
 export interface backendInterface {
-    assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    deleteAdmissionInquiryAdmin(id: bigint): Promise<boolean>;
-    getAdmissionInquiriesAdmin(): Promise<Array<AdmissionInquiry>>;
-    getAdmissionInquiriesWithIdsAdmin(): Promise<Array<[bigint, AdmissionInquiry]>>;
+    deleteAdmissionInquiryAdmin(password: string, id: bigint): Promise<boolean>;
+    getAdmissionInquiriesAdmin(password: string): Promise<Array<AdmissionInquiry>>;
+    getAdmissionInquiriesWithIdsAdmin(password: string): Promise<Array<[bigint, AdmissionInquiry]>>;
     getAllTestimonials(): Promise<Array<Testimonial>>;
-    getCallerUserProfile(): Promise<UserProfile | null>;
-    getCallerUserRole(): Promise<UserRole>;
-    getContactSubmissionsAdmin(): Promise<Array<ContactSubmission>>;
-    getUserProfile(user: Principal): Promise<UserProfile | null>;
-    isCallerAdmin(): Promise<boolean>;
-    saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    getContactSubmissionsAdmin(password: string): Promise<Array<ContactSubmission>>;
     submitAdmissionInquiry(name: string, phone: string, email: string, course: string, message: string): Promise<void>;
     submitContact(name: string, email: string, message: string): Promise<void>;
     submitTestimonial(studentName: string, course: string, review: string, rating: bigint): Promise<void>;

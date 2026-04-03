@@ -54,21 +54,16 @@ export default function AdminPanel() {
   const fetchData = useCallback(
     async (pwd: string) => {
       if (!actor) return;
-      // Cast to any: generated type stubs don't include the password parameter
-      // added in the latest backend. The actual runtime method accepts it.
-      const raw = actor as any;
       setLoadingData(true);
       setDataError("");
       try {
         const [enqData, ctData] = await Promise.all([
-          raw.getAdmissionInquiriesWithIdsAdmin(pwd),
-          raw.getContactSubmissionsAdmin(pwd),
+          actor.getAdmissionInquiriesWithIdsAdmin(pwd),
+          actor.getContactSubmissionsAdmin(pwd),
         ]);
         const mapped: EnquiryEntry[] = (enqData as [bigint, AdmissionInquiry][])
           .map(([id, data]) => ({ id, data }))
-          .sort((a: EnquiryEntry, b: EnquiryEntry) =>
-            Number(b.data.timestamp - a.data.timestamp),
-          );
+          .sort((a, b) => Number(b.data.timestamp - a.data.timestamp));
         setEnquiries(mapped);
         setContacts(ctData as ContactSubmission[]);
         setFetchDone(true);
@@ -95,8 +90,7 @@ export default function AdminPanel() {
     if (!actor) return;
     setDeletingId(id);
     try {
-      // Cast to any: generated type stub has old signature without password param
-      await (actor as any).deleteAdmissionInquiryAdmin(adminPassword, id);
+      await actor.deleteAdmissionInquiryAdmin(adminPassword, id);
       setEnquiries((prev) => prev.filter((e) => e.id !== id));
     } catch (err) {
       console.error("Failed to delete enquiry:", err);
@@ -160,22 +154,15 @@ export default function AdminPanel() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="border-gray-300 focus:border-orange-500 focus:ring-orange-500"
-                  data-ocid="admin.input"
                   required
                 />
               </div>
               {loginError && (
-                <p
-                  className="text-red-600 text-sm"
-                  data-ocid="admin.error_state"
-                >
-                  {loginError}
-                </p>
+                <p className="text-red-600 text-sm">{loginError}</p>
               )}
               <Button
                 type="submit"
                 className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2"
-                data-ocid="admin.submit_button"
               >
                 Enter Admin Panel
               </Button>
@@ -211,7 +198,6 @@ export default function AdminPanel() {
             className="border-white text-white hover:bg-orange-700 bg-transparent"
             onClick={handleRefresh}
             disabled={loadingData || actorLoading}
-            data-ocid="admin.secondary_button"
           >
             {loadingData ? (
               <Loader2 className="h-4 w-4 mr-1 animate-spin" />
@@ -225,7 +211,6 @@ export default function AdminPanel() {
             size="sm"
             className="border-white text-white hover:bg-orange-700 bg-transparent"
             onClick={handleLogout}
-            data-ocid="admin.delete_button"
           >
             <LogOut className="h-4 w-4 mr-1" /> Logout
           </Button>
@@ -234,20 +219,14 @@ export default function AdminPanel() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         {actorLoading && (
-          <div
-            className="mb-4 p-4 bg-orange-50 border border-orange-200 text-orange-700 rounded-md text-sm flex items-center gap-2"
-            data-ocid="admin.loading_state"
-          >
+          <div className="mb-4 p-4 bg-orange-50 border border-orange-200 text-orange-700 rounded-md text-sm flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" />
             Connecting to backend, please wait...
           </div>
         )}
 
         {dataError && (
-          <div
-            className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm"
-            data-ocid="admin.error_state"
-          >
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
             {dataError}
           </div>
         )}
@@ -283,7 +262,7 @@ export default function AdminPanel() {
 
         <Tabs defaultValue="enquiries">
           <TabsList className="mb-4">
-            <TabsTrigger value="enquiries" data-ocid="admin.tab">
+            <TabsTrigger value="enquiries">
               Admission Enquiries
               {enquiries.length > 0 && (
                 <Badge className="ml-2 bg-orange-600 text-white text-xs">
@@ -291,7 +270,7 @@ export default function AdminPanel() {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="contacts" data-ocid="admin.tab">
+            <TabsTrigger value="contacts">
               Contact Messages
               {contacts.length > 0 && (
                 <Badge className="ml-2 bg-blue-600 text-white text-xs">
@@ -310,17 +289,11 @@ export default function AdminPanel() {
               </CardHeader>
               <CardContent>
                 {loadingData ? (
-                  <div
-                    className="flex justify-center py-12"
-                    data-ocid="admin.loading_state"
-                  >
+                  <div className="flex justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-orange-600" />
                   </div>
                 ) : enquiries.length === 0 ? (
-                  <div
-                    className="text-center py-12 text-gray-400"
-                    data-ocid="admin.empty_state"
-                  >
+                  <div className="text-center py-12 text-gray-400">
                     <ClipboardList className="h-16 w-16 mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">No enquiries yet</p>
                     <p className="text-sm">
@@ -328,7 +301,7 @@ export default function AdminPanel() {
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto" data-ocid="admin.table">
+                  <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-orange-50">
@@ -363,7 +336,6 @@ export default function AdminPanel() {
                           <TableRow
                             key={String(enq.id)}
                             className="hover:bg-orange-50/50"
-                            data-ocid={`admin.item.${idx + 1}`}
                           >
                             <TableCell className="text-gray-500 text-sm">
                               {idx + 1}
@@ -398,7 +370,6 @@ export default function AdminPanel() {
                                 className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                 onClick={() => handleDeleteEnquiry(enq.id)}
                                 disabled={deletingId === enq.id}
-                                data-ocid={`admin.delete_button.${idx + 1}`}
                               >
                                 {deletingId === enq.id ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -426,17 +397,11 @@ export default function AdminPanel() {
               </CardHeader>
               <CardContent>
                 {loadingData ? (
-                  <div
-                    className="flex justify-center py-12"
-                    data-ocid="admin.loading_state"
-                  >
+                  <div className="flex justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                   </div>
                 ) : contacts.length === 0 ? (
-                  <div
-                    className="text-center py-12 text-gray-400"
-                    data-ocid="admin.empty_state"
-                  >
+                  <div className="text-center py-12 text-gray-400">
                     <Mail className="h-16 w-16 mx-auto mb-4 opacity-30" />
                     <p className="text-lg font-medium">No messages yet</p>
                     <p className="text-sm">
@@ -444,7 +409,7 @@ export default function AdminPanel() {
                     </p>
                   </div>
                 ) : (
-                  <div className="overflow-x-auto" data-ocid="admin.table">
+                  <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
                         <TableRow className="bg-blue-50">
@@ -470,7 +435,6 @@ export default function AdminPanel() {
                           <TableRow
                             key={`${ct.email}-${String(ct.timestamp)}`}
                             className="hover:bg-blue-50/50"
-                            data-ocid={`admin.item.${idx + 1}`}
                           >
                             <TableCell className="text-gray-500 text-sm">
                               {idx + 1}
